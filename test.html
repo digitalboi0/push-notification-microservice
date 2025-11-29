@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Push Test</title>
+</head>
+<body>
+    <h1>Web Push Test Page</h1>
+    <button id="subscribeButton">Subscribe to Push</button>
+    <button id="unsubscribeButton" style="display:none;">Unsubscribe from Push</button>
+    <button id="getSubscriptionButton">Get Subscription</button>
+    <button id="copySubscriptionButton">Copy Subscription to Clipboard</button>
+    <br><br>
+    <textarea id="output" rows="20" cols="80" placeholder="Subscription object will appear here..."></textarea>
+    <br><br>
+    <p>Status: <span id="status">Not subscribed</span></p>
+
+    <script>
+        // Replace 'YOUR_VAPID_PUBLIC_KEY_HERE' with the actual VAPID public key from your Django Admin
+        const applicationServerPublicKey = 'BAb3RBsL6ZtNyYJ15OJVhNz633GEMFGXm7M9JGWJVm9SBgn0IC_Jglnahnd9JyxXanQ3OdXuDYBYmJdWpa_mtbU';
+
+        // Register the service worker
+        navigator.serviceWorker.register('sw.js')
+            .then(function(registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch(function(error) {
+                console.error('Service Worker registration failed:', error);
+            });
+
+        // Get DOM elements
+        const subscribeButton = document.getElementById('subscribeButton');
+        const unsubscribeButton = document.getElementById('unsubscribeButton');
+        const getSubscriptionButton = document.getElementById('getSubscriptionButton');
+        const copySubscriptionButton = document.getElementById('copySubscriptionButton');
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+
+        // Function to urlBase64ToUint8Array - converts the VAPID public key from URL-safe base64 to Uint8Array
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/\-/g, '+')
+                .replace(/_/g, '/');
+
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        // Function to subscribe
+        function subscribeUser() {
+            navigator.serviceWorker.ready
+                .then(function(registration) {
+                    const subscribeOptions = {
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(applicationServerPublicKey)
+                    };
+
+                    return registration.pushManager.subscribe(subscribeOptions);
+                })
+                .then(function(subscription) {
+                    console.log('Push subscription successful:', subscription);
+                    output.value = JSON.stringify(subscription, null, 2);
+                    status.textContent = 'Subscribed';
+                    subscribeButton.disabled = true;
+                    unsubscribeButton.style.display = 'inline-block';
+                })
+                .catch(function(error) {
+                    console.error('Push subscription error:', error);
+                    status.textContent = 'Subscription failed';
+                    if (error.name === 'NotAllowedError') {
+                        console.warn('Push notification permission was denied.');
+                        status.textContent = 'Permission denied';
+                    }
+                });
+        }
+
+        // Function to unsubscribe
+        function unsubscribeUser() {
+            navigator.serviceWorker.ready
+                .then(function(registration) {
+                    return registration.pushManager.getSubscription();
+                })
+                .then(function(subscription) {
+                    if (subscription) {
+                        return subscription.unsubscribe();
+                    } else {
+                        console.log('No subscription to unsubscribe.');
+                        status.textContent = 'Not subscribed';
+                        return Promise.resolve();
+                    }
+                })
+                .then(function(successful) {
+                    if (successful) {
+                        console.log('Push subscription unsubscribed.');
+                        output.value = '';
+                        status.textContent = 'Unsubscribed';
+                        subscribeButton.disabled = false;
+                        unsubscribeButton.style.display = 'none';
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Push unsubscribe error:', error);
+                    status.textContent = 'Unsubscribe failed';
+                });
+        }
+
+        // Function to get existing subscription
+        function getExistingSubscription() {
+            navigator.serviceWorker.ready
+                .then(function(registration) {
+                    return registration.pushManager.getSubscription();
+                })
+                .then(function(subscription) {
+                    if (subscription) {
+                        console.log('Existing subscription found:', subscription);
+                        output.value = JSON.stringify(subscription, null, 2);
+                        status.textContent = 'Subscribed';
+                        subscribeButton.disabled = true;
+                        unsubscribeButton.style.display = 'inline-block';
+                    } else {
+                        console.log('No existing subscription.');
+                        output.value = '';
+                        status.textContent = 'Not subscribed';
+                        subscribeButton.disabled = false;
+                        unsubscribeButton.style.display = 'none';
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error getting subscription:', error);
+                    status.textContent = 'Error getting subscription';
+                });
+        }
+
+        // Function to copy subscription to clipboard
+        function copySubscriptionToClipboard() {
+            if (output.value) {
+                navigator.clipboard.writeText(output.value)
+                    .then(() => {
+                        console.log('Subscription copied to clipboard');
+                        // Optional: Show a temporary message
+                        const originalText = copySubscriptionButton.textContent;
+                        copySubscriptionButton.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copySubscriptionButton.textContent = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy subscription: ', err);
+                    });
+            } else {
+                console.warn('No subscription to copy.');
+            }
+        }
+
+        // Add event listeners
+        subscribeButton.addEventListener('click', subscribeUser);
+        unsubscribeButton.addEventListener('click', unsubscribeUser);
+        getSubscriptionButton.addEventListener('click', getExistingSubscription);
+        copySubscriptionButton.addEventListener('click', copySubscriptionToClipboard);
+
+        // Check for existing subscription on page load
+        window.addEventListener('load', function() {
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                console.log('Service Worker and Push is supported');
+
+                navigator.serviceWorker.ready.then(function(registration) {
+                    return registration.pushManager.getSubscription();
+                }).then(function(subscription) {
+                    if (subscription) {
+                        output.value = JSON.stringify(subscription, null, 2);
+                        status.textContent = 'Subscribed';
+                        subscribeButton.disabled = true;
+                        unsubscribeButton.style.display = 'inline-block';
+                    }
+                });
+            } else {
+                console.warn('Service Worker or Push not supported in this browser.');
+                status.textContent = 'Service Worker/Push not supported';
+                subscribeButton.disabled = true;
+            }
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      # Load DB credentials from .env, with fallbacks
+      - POSTGRES_DB=${DB_NAME:-push_notifications}
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+    # Remove external port exposure if only used internally by the service
+    # ports:
+    #   - "5432:5432"
+    # Use a dedicated network for internal communication
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    # Remove external port exposure if only used internally by the service
+    # ports:
+    #   - "6379:6379"
+    # Use a dedicated network for internal communication
+    networks:
+      - internal
+
+  web:
+    build: .
+    # Use gunicorn for production-like behavior
+    command: gunicorn push.wsgi:application --bind 0.0.0.0:8000
+    # command: python manage.py runserver 0.0.0.0:8000 # Use this for development
+    volumes:
+      - .:/app
+    ports:
+      # Expose the API port (8000) so other services or external clients can call it
+      - "8000:8000"
+    environment:
+      # DB_HOST and REDIS_URL are loaded via env_file
+      - DB_HOST=db
+      # REDIS_URL is loaded via env_file
+    env_file:
+      - .env # Load ALL variables from .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - internal
+
+  worker:
+    build: .
+    # Correctly reference the Django project and Celery app instance
+    command: celery -A push worker --loglevel=info --settings=push.settings
+    volumes:
+      - .:/app
+    environment:
+      # DB_HOST and REDIS_URL are loaded via env_file
+      - DB_HOST=db
+      # REDIS_URL is loaded via env_file
+    env_file:
+      - .env # Load ALL variables from .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - internal
+
+  beat:
+    build: .
+    # Correctly reference the Django project and Celery app instance
+    command: celery -A push beat --loglevel=info --settings=push.settings
+    volumes:
+      - .:/app
+    environment:
+      # DB_HOST and REDIS_URL are loaded via env_file
+      - DB_HOST=db
+      # REDIS_URL is loaded via env_file
+    env_file:
+      - .env # Load ALL variables from .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - internal
+
+volumes:
+  postgres_data:
+
+networks:
+  internal:
+    driver: bridge # Creates an isolated network for the service components

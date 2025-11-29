@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Audit AI Push Notification API</title>
+    <style>
+        /* General Styles */
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--background-color);
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Introduction Section */
+        .intro {
+            background-color: var(--card-background);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .intro h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .intro p {
+            margin-bottom: 0.5rem;
+        }
+
+        .base-url {
+            background-color: #e9ecef;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        /* Authentication Section */
+        .section {
+            background-color: var(--card-background);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .auth-method {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .auth-icon {
+            background-color: var(--accent-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-details h3 {
+            margin-bottom: 0.25rem;
+        }
+
+        .auth-details p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .auth-example {
+            background-color: #2d3748; /* Dark background for code */
+            color: #e2e8f0; /* Light text */
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        /* Endpoints Section */
+        .endpoint-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .endpoint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .method {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .endpoint-url {
+            font-family: monospace;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+
+        .endpoint-description {
+            margin-bottom: 1rem;
+        }
+
+        .endpoint-section-title {
+            font-weight: 600;
+            margin: 0.75rem 0 0.25rem 0;
+            color: var(--text-secondary);
+        }
+
+        .parameter-table, .response-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        .parameter-table th, .response-table th,
+        .parameter-table td, .response-table td {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .parameter-table th, .response-table th {
+            background-color: #e9ecef;
+            font-weight: 600;
+        }
+
+        .example {
+            background-color: #f1f3f4;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .example pre {
+            margin: 0;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--text-primary);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .endpoint-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <h1>Site Audit AI Push API</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#introduction">Introduction</a></li>
+                    <li><a href="#authentication">Authentication</a></li>
+                    <li><a href="#endpoints">Endpoints</a></li>
+                    <li><a href="#templates">Templates</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <section id="introduction" class="intro">
+            <h2>Introduction</h2>
+            <p>Welcome to the Site Audit AI Push Notification API documentation. This API allows you to send push notifications to users across multiple platforms: Android, iOS, and Web.</p>
+            <p>Our service provides a unified interface to manage device registrations and send targeted notifications based on pre-defined templates.</p>
+            <div class="base-url">
+                Base URL: <code>https://your-api-domain.com/api/</code>
+            </div>
+        </section>
+
+        <section id="authentication" class="section">
+            <h2>Authentication</h2>
+            <p>All API requests require an App Key for authentication. This key must be provided in the request headers.</p>
+
+            <div class="auth-method">
+                <div class="auth-icon">🔑</div>
+                <div class="auth-details">
+                    <h3>Header Authentication</h3>
+                    <p>Include your unique App Key in the request header.</p>
+                </div>
+            </div>
+
+            <div class="auth-example">
+                <pre>X-App-Key: YOUR_APP_KEY_HERE</pre>
+            </div>
+        </section>
+
+        <section id="endpoints" class="section">
+            <h2>Endpoints</h2>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method">POST</span>
+                    <span class="endpoint-url">/notifications/send/</span>
+                </div>
+                <div class="endpoint-description">
+                    <p>Sends a push notification to a specific device.</p>
+                </div>
+
+                <div class="endpoint-section-title">Request Parameters</div>
+                <table class="parameter-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>notification_type</td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>The name of the template to use for the notification (e.g., 'welcome', 'audit_completed').</td>
+                        </tr>
+                        <tr>
+                            <td>device_token</td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>The platform-specific push token for the target device. For web, this is the entire subscription object as a JSON string.</td>
+                        </tr>
+                        <tr>
+                            <td>platform</td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>The target platform. Valid values: 'android', 'ios', 'web'.</td>
+                        </tr>
+                        <tr>
+                            <td>user</td>
+                            <td>Object</td>
+                            <td>Yes</td>
+                            <td>A JSON object containing user-specific data for template rendering (e.g., {"name": "John Doe", "email": "john@example.com"}).</td>
+                        </tr>
+                        <tr>
+                            <td>data</td>
+                            <td>Object</td>
+                            <td>No</td>
+                            <td>Optional custom data to be included in the notification payload.</td>
+                        </tr>
+                        <tr>
+                            <td>title</td>
+                            <td>String</td>
+                            <td>No</td>
+                            <td>Optional. If provided, overrides the title from the template.</td>
+                        </tr>
+                        <tr>
+                            <td>body</td>
+                            <td>String</td>
+                            <td>No</td>
+                            <td>Optional. If provided, overrides the body from the template.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="endpoint-section-title">Response</div>
+                <table class="response-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Condition</th>
+                            <th>Body</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>202</td>
+                            <td>Notification successfully queued for sending.</td>
+                            <td><pre>{ "success": true, "message": "Notification queued for sending", "data": { "send_log_id": "...", "device_id": "..." } }</pre></td>
+                        </tr>
+                        <tr>
+                            <td>400</td>
+                            <td>Invalid request data.</td>
+                            <td><pre>{ "success": false, "message": "Invalid request data", "errors": {...} }</pre></td>
+                        </tr>
+                        <tr>
+                            <td>401</td>
+                            <td>Missing or invalid App Key.</td>
+                            <td><pre>{ "success": false, "message": "App key is required" }</pre></td>
+                        </tr>
+                        <tr>
+                            <td>404</td>
+                            <td>Specified template not found.</td>
+                            <td><pre>{ "success": false, "message": "Template '...' not found" }</pre></td>
+                        </tr>
+                        <tr>
+                            <td>500</td>
+                            <td>Internal server error.</td>
+                            <td><pre>{ "success": false, "message": "Internal server error" }</pre></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="endpoint-section-title">Example Request</div>
+                <div class="example">
+                    <pre>{
+  "notification_type": "audit_completed_success",
+  "device_token": "YOUR_DEVICE_TOKEN_OR_SUBSCRIPTION_OBJECT_STRING",
+  "platform": "android",
+  "user": {
+    "name": "Jane Smith",
+    "email": "jane@example.com"
+  },
+  "data": {
+    "audit_id": "abc123",
+    "score": 85
+  }
+}</pre>
+                </div>
+            </div>
+
+            <!-- Bulk Send Endpoint -->
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method">POST</span>
+                    <span class="endpoint-url">/notifications/bulk/</span>
+                </div>
+                <div class="endpoint-description">
+                    <p>Sends push notifications to multiple devices in a single request.</p>
+                </div>
+
+                <div class="endpoint-section-title">Request Parameters</div>
+                <table class="parameter-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>notifications</td>
+                            <td>Array</td>
+                            <td>Yes</td>
+                            <td>An array of notification objects. Each object must conform to the parameters of the single send endpoint.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="endpoint-section-title">Response</div>
+                <p>Similar to the single send endpoint, but the data includes an array of results for each notification attempt.</p>
+
+                <div class="endpoint-section-title">Example Request</div>
+                <div class="example">
+                    <pre>{
+  "notifications": [
+    {
+      "notification_type": "welcome_new_user",
+      "device_token": "DEVICE_TOKEN_1",
+      "platform": "ios",
+      "user": { "name": "User One" }
+    },
+    {
+      "notification_type": "audit_completed_success",
+      "device_token": "DEVICE_TOKEN_2",
+      "platform": "web",
+      "user": { "name": "User Two", "email": "user2@example.com" },
+      "data": { "score": 92 }
+    }
+  ]
+}</pre>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="templates" class="section">
+            <h2>Templates</h2>
+            <p>Templates define the structure of your notifications. They consist of a title, body, subject (optional), and data (optional). Placeholders like `{user.name}` are used to personalize the content dynamically using the `user` object provided in the request.</p>
+
+            <h3>Available Templates</h3>
+            <ul>
+                <li><strong>welcome_new_user:</strong> Greet a new user after signup.</li>
+                <li><strong>audit_started:</strong> Notify user when an audit begins.</li>
+                <li><strong>audit_completed_success:</strong> Inform user of a successful audit completion.</li>
+                <li><strong>audit_completed_low_score:</strong> Highlight areas for improvement if the score is low.</li>
+                <li><strong>audit_failed:</strong> Alert user if an audit encounters an issue.</li>
+                <li><strong>high_priority_issue_found:</strong> Urgent notification for critical issues.</li>
+                <li><strong>weekly_summary:</strong> Summarize activity over the past week.</li>
+                <li><strong>new_feature_announcement:</strong> Announce new features to users.</li>
+                <li><strong>reminder_unused_credits:</strong> Remind users about unused resources.</li>
+            </ul>
+
+            <h3>Template Placeholders</h3>
+            <p>Common placeholders used within templates:</p>
+            <ul>
+                <li><code>{user.name}</code></li>
+                <li><code>{user.email}</code></li>
+                <li><code>{audit.name}</code></li>
+                <li><code>{audit.domain}</code></li>
+                <li><code>{result.score}</code></li>
+                <li><code>{summary.week_start}</code></li>
+                <li><code>{summary.average_score}</code></li>
+                <li><code>{feature.name}</code></li>
+            </ul>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Site Audit AI. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
