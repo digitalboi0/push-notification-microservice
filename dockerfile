@@ -47,5 +47,5 @@ EXPOSE 8000
 # Define the command to run the application server (Gunicorn for production)
 CMD ["gunicorn", "push.wsgi:application", "--bind", "0.0.0.0:8000"]
 
-# If using the development server (NOT recommended for production microservice):
+
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

@@ -47,7 +47,7 @@ This Django-based service handles sending push notifications to Android (FCM), i
 
 1.  **Clone the Repository:**
     ```bash
-    git clone https://github.com/YOUR_USERNAME/push_notification_service.git
+    git clone https://github.com/digitalboi0/push-notification-microservice.git
     cd push_notification_service
     ```
 
