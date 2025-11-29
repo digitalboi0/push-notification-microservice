@@ -182,7 +182,7 @@ This Django-based service handles sending push notifications to Android (FCM), i
 
 ## API Documentation
 
-See the `api_docs.html` file included in the project for detailed API documentation, including endpoints, request/response formats, and examples.
+See the https://push-notification-microservice.onrender.com/api/docs/ file included in the project for detailed API documentation, including endpoints, request/response formats, and examples.
 
 ## Deployment
 
