@@ -20,7 +20,8 @@ class AppKeyMiddleware(MiddlewareMixin):
             request.path.startswith('/favicon.ico') or
             request.path.startswith('/admin/jsi18n/') or
             request.path.startswith('/admin/static/') or
-            request.path.startswith('/static/admin/')
+            request.path.startswith('/static/admin/') or
+            request.path.startswith('/api/doc/')
         ):
             return None
 

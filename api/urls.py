@@ -3,6 +3,7 @@ from .views.notification_views import SendNotificationView, BulkSendNotification
 from .views.app_views import AppListView, AppDetailView
 from .views.device_views import DeviceRegistrationView
 from .views.template_views import TemplateListView, TemplateDetailView, TemplatePreviewView
+from . import views
 
 urlpatterns = [
     path('notifications/send/', SendNotificationView.as_view(), name='send-notification'),
@@ -13,4 +14,5 @@ urlpatterns = [
     path('templates/', TemplateListView.as_view(), name='template-list'),
     path('templates/<uuid:pk>/', TemplateDetailView.as_view(), name='template-detail'),
     path('templates/preview/', TemplatePreviewView.as_view(), name='template-preview'),
+    path('docs/', views.doc, name='api-docs'),
 ]
