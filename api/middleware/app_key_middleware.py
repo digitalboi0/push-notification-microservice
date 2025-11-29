@@ -21,7 +21,7 @@ class AppKeyMiddleware(MiddlewareMixin):
             request.path.startswith('/admin/jsi18n/') or
             request.path.startswith('/admin/static/') or
             request.path.startswith('/static/admin/') or
-            request.path.startswith('/api/doc/')
+            request.path.startswith('/api/docs/')
         ):
             return None
 
