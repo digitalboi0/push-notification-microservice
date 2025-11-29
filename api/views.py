@@ -7,7 +7,7 @@ def doc(request):
     Serves the documentation page (doc.html).
     """
     try:
-        return render(request, "api/doc.html") # Ensure 'api/doc.html' exists in your template dirs
+        return render(request, "doc.html") # Ensure 'api/doc.html' exists in your template dirs
     except Exception as e:
         # Log the error if needed
         # import logging
